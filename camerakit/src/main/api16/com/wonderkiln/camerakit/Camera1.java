@@ -976,7 +976,16 @@ public class Camera1 extends CameraImpl {
         }
     }
 
-    private File getVideoFile() {
+private File getVideoFile() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        // For Android 10 (API level 29) and above, use getExternalFilesDir()
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "Camera");
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
+            return null;
+        }
+        return new File(mediaStorageDir, "video.mp4");
+    } else {
+        // For Android versions prior to 10, use Environment.getExternalStorageDirectory()
         if (!Environment.getExternalStorageState().equalsIgnoreCase(Environment.MEDIA_MOUNTED)) {
             return null;
         }
@@ -989,8 +998,9 @@ public class Camera1 extends CameraImpl {
             }
         }
 
-        return new File(mediaStorageDir.getPath() + File.separator + "video.mp4");
+        return new File(mediaStorageDir, "video.mp4");
     }
+}
 
     private CamcorderProfile getCamcorderProfile(@VideoQuality int videoQuality) {
         CamcorderProfile camcorderProfile = null;
